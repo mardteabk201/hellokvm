@@ -1,13 +1,11 @@
-all: hellokvm
+all: test
 
-clean:
-	-@rm *.o *.h *.bin hellokvm 2> /dev/null || true
-
-hellokvm: hellokvm.o
-	gcc -g hellokvm.o -o hellokvm
+test: hellokvm.o
+	gcc -g $^ -o $@
+	rm *.o
 
 hellokvm.o: hellokvm.c code.h
-	gcc -g -o hellokvm.o -c hellokvm.c
+	gcc -o $@ -c hellokvm.c -g -O0 -Wall
 
 code.h: code.bin
 	BINCODE="$(shell hexdump -v -e '"\\""x" 1/1 "%02x" ""' code.bin)" ; echo "const char guest_code[] = \"$$BINCODE\";" > code.h
@@ -18,3 +16,5 @@ code.bin: code.o
 code.o: code.S
 	as -32 code.S -o code.o
 	
+clean:
+	-@rm *.o *.h *.bin test 2> /dev/null || true
